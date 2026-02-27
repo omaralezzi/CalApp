@@ -11,7 +11,22 @@ except ImportError as e:
         "(e.g. use Python 3.12 installed from python.org or via Homebrew with --with-tcl-tk)."
     ) from e
 
-from calculator import add, subtract, multiply, divide
+from calculator import (
+    add,
+    subtract,
+    multiply,
+    divide,
+    negate,
+    percent,
+    sin,
+    cos,
+    tan,
+    log,
+    exp,
+    sqrt,
+    pi,
+)
+import math
 
 
 class CalculatorGUI:
@@ -51,6 +66,29 @@ class CalculatorGUI:
         for j in range(4):
             master.grid_columnconfigure(j, weight=1)
 
+        # scientific buttons (initially hidden)
+        self.sci_mode = False
+        self.sci_buttons = []
+        sci_specs = [
+            ("sin", 6, 0), ("cos", 6, 1), ("tan", 6, 2), ("log", 6, 3),
+            ("sqrt", 7, 0), ("exp", 7, 1), ("pi", 7, 2),
+        ]
+        for text, row, col in sci_specs:
+            btn = tk.Button(master, text=text, font=("Arial", 18), command=lambda t=text: self._on_button(t))
+            self.sci_buttons.append(btn)
+            btn.grid(row=row, column=col, sticky="nsew")
+        # hide them initially
+        for btn in self.sci_buttons:
+            btn.grid_remove()
+
+        # menu for mode switching
+        menubar = tk.Menu(master)
+        mode_menu = tk.Menu(menubar, tearoff=0)
+        mode_menu.add_command(label="Basic", command=self._set_basic)
+        mode_menu.add_command(label="Scientific", command=self._toggle_sci)
+        menubar.add_cascade(label="Mode", menu=mode_menu)
+        master.config(menu=menubar)
+
     def _on_button(self, label):
         if label == "C":
             self._clear()
@@ -62,6 +100,8 @@ class CalculatorGUI:
             self._calculate()
         elif label in "+-*/":
             self._set_operator(label)
+        elif label in ("sin", "cos", "tan", "log", "sqrt", "exp", "pi"):
+            self._sci_operation(label)
         else:
             # digit or dot
             self._append(label)
@@ -129,6 +169,47 @@ class CalculatorGUI:
             self.display_value(self.current)
             self.operator = None
             self.operand = None
+
+    def _sci_operation(self, op):
+        # unary scientific operations - operate on current value immediately
+        try:
+            value = float(self.current) if self.current else 0.0
+        except ValueError:
+            value = 0.0
+        try:
+            if op == "sin":
+                result = sin(value)
+            elif op == "cos":
+                result = cos(value)
+            elif op == "tan":
+                result = tan(value)
+            elif op == "log":
+                result = log(value)
+            elif op == "sqrt":
+                result = sqrt(value)
+            elif op == "exp":
+                result = exp(value)
+            elif op == "pi":
+                result = pi()
+            else:
+                result = value
+        except Exception:
+            result = "Error"
+        self.current = str(result)
+        self.display_value(self.current)
+
+    def _toggle_sci(self):
+        self.sci_mode = not self.sci_mode
+        for btn in self.sci_buttons:
+            if self.sci_mode:
+                btn.grid()
+            else:
+                btn.grid_remove()
+
+    def _set_basic(self):
+        self.sci_mode = False
+        for btn in self.sci_buttons:
+            btn.grid_remove()
 
     def display_value(self, value):
         self.display.delete(0, tk.END)

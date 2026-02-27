@@ -1,4 +1,5 @@
 import pytest
+import math
 
 from calculator import add, subtract, multiply, divide
 
@@ -22,6 +23,29 @@ def test_divide():
 def test_divide_zero():
     with pytest.raises(ZeroDivisionError):
         divide(1, 0)
+
+
+def test_negate():
+    assert negate(5) == -5
+    assert negate(-3) == 3
+
+
+def test_percent():
+    assert percent(50) == 0.5
+    assert percent(1) == 0.01
+
+
+def test_scientific():
+    # trig functions at known angles
+    assert sin(0) == 0
+    assert cos(0) == 1
+    assert tan(0) == 0
+    # log and exp
+    assert log(1) == 0
+    assert exp(1) == pytest.approx(math.e)
+    # sqrt and pi
+    assert sqrt(4) == 2
+    assert pi() == pytest.approx(math.pi)
 
 
 def test_negate():
