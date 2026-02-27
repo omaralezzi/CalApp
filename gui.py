@@ -3,7 +3,14 @@
 Layout and behavior are modeled loosely after the iPhone calculator.
 """
 
-import tkinter as tk
+try:
+    import tkinter as tk
+except ImportError as e:
+    raise ImportError(
+        "Tkinter is not available. Make sure you are running a Python build with GUI support "
+        "(e.g. use Python 3.12 installed from python.org or via Homebrew with --with-tcl-tk)."
+    ) from e
+
 from calculator import add, subtract, multiply, divide
 
 
