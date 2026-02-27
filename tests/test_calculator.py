@@ -48,6 +48,26 @@ def test_scientific():
     assert pi() == pytest.approx(math.pi)
 
 
+def test_bitwise_and_or_xor():
+    assert bit_and(6, 3) == 2
+    assert bit_or(6, 3) == 7
+    assert bit_xor(6, 3) == 5
+
+
+def test_bitwise_shifts_and_not():
+    assert lshift(1, 3) == 8
+    assert rshift(8, 2) == 2
+    # bit_not with 8 bits: ~0x0f == 0xf0 within 8 bits
+    assert bit_not(0x0f, bits=8) == 0xf0
+
+
+def test_bin_hex_conversion():
+    assert to_bin(10) == "1010"
+    assert to_hex(255) == "ff"
+    assert from_bin("1010") == 10
+    assert from_hex("ff") == 255
+
+
 def test_negate():
     assert negate(5) == -5
     assert negate(-3) == 3

@@ -72,6 +72,49 @@ def pi():
     """Return the mathematical constant pi."""
     return math.pi
 
+    # Programmer / bitwise helpers
+    def bit_and(a, b):
+        """Return bitwise AND of two integers."""
+        return int(a) & int(b)
+
+    def bit_or(a, b):
+        """Return bitwise OR of two integers."""
+        return int(a) | int(b)
+
+    def bit_xor(a, b):
+        """Return bitwise XOR of two integers."""
+        return int(a) ^ int(b)
+
+    def bit_not(a, bits=32):
+        """Return bitwise NOT of an integer within given bit width."""
+        a = int(a)
+        mask = (1 << bits) - 1
+        return (~a) & mask
+
+    def lshift(a, n):
+        """Left shift integer a by n bits."""
+        return int(a) << int(n)
+
+    def rshift(a, n):
+        """Right shift integer a by n bits."""
+        return int(a) >> int(n)
+
+    def to_bin(a):
+        """Return binary representation (without '0b')."""
+        return bin(int(a))[2:]
+
+    def to_hex(a):
+        """Return hexadecimal representation (without '0x'), lowercase."""
+        return hex(int(a))[2:]
+
+    def from_bin(s):
+        """Parse binary string to int."""
+        return int(str(s), 2)
+
+    def from_hex(s):
+        """Parse hex string to int."""
+        return int(str(s), 16)
+
 
 def negate(a):
     """Return the value of a with its sign flipped."""

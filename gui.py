@@ -86,8 +86,30 @@ class CalculatorGUI:
         mode_menu = tk.Menu(menubar, tearoff=0)
         mode_menu.add_command(label="Basic", command=self._set_basic)
         mode_menu.add_command(label="Scientific", command=self._toggle_sci)
+        mode_menu.add_command(label="Programmer", command=self._toggle_prog)
         menubar.add_cascade(label="Mode", menu=mode_menu)
         master.config(menu=menubar)
+
+        # programmer buttons
+        self.prog_mode = False
+        self.prog_buttons = []
+        prog_specs = [
+            ("AND", 8, 0), ("OR", 8, 1), ("XOR", 8, 2), ("NOT", 8, 3),
+            ("LSH", 9, 0), ("RSH", 9, 1), ("BIN", 9, 2), ("HEX", 9, 3), ("DEC", 9, 4),
+        ]
+        for text, row, col in prog_specs:
+            btn = tk.Button(master, text=text, font=("Arial", 14), command=lambda t=text: self._on_button(t))
+            self.prog_buttons.append((btn, row, col))
+            # place some beyond grid if necessary
+            try:
+                btn.grid(row=row, column=col, sticky="nsew")
+            except Exception:
+                btn.grid(row=row, column=col, sticky="nsew")
+        for btn, _, _ in self.prog_buttons:
+            btn.grid_remove()
+
+        # programmer display base
+        self.prog_base = "DEC"  # DEC, BIN, HEX
 
     def _on_button(self, label):
         if label == "C":
@@ -102,6 +124,8 @@ class CalculatorGUI:
             self._set_operator(label)
         elif label in ("sin", "cos", "tan", "log", "sqrt", "exp", "pi"):
             self._sci_operation(label)
+        elif label in ("AND", "OR", "XOR", "NOT", "LSH", "RSH", "BIN", "HEX", "DEC"):
+            self._prog_operation(label)
         else:
             # digit or dot
             self._append(label)
@@ -210,6 +234,90 @@ class CalculatorGUI:
         self.sci_mode = False
         for btn in self.sci_buttons:
             btn.grid_remove()
+
+    def _toggle_prog(self):
+        # turn off scientific UI when enabling programmer
+        self._set_basic()
+        self.prog_mode = not self.prog_mode
+        for btn, _, _ in self.prog_buttons:
+            if self.prog_mode:
+                btn.grid()
+            else:
+                btn.grid_remove()
+
+    def _parse_current_int(self):
+        s = self.current if self.current else self.display.get()
+        if not s:
+            return 0
+        try:
+            if self.prog_base == "BIN":
+                return int(str(s), 2)
+            elif self.prog_base == "HEX":
+                return int(str(s), 16)
+            else:
+                return int(float(s))
+        except Exception:
+            return 0
+
+    def _display_int(self, value):
+        if self.prog_base == "BIN":
+            self.display_value(to_bin(value))
+        elif self.prog_base == "HEX":
+            self.display_value(to_hex(value))
+        else:
+            self.display_value(str(int(value)))
+
+    def _prog_operation(self, op):
+        # handle base switch
+        if op in ("BIN", "HEX", "DEC"):
+            self.prog_base = op
+            # refresh display
+            try:
+                val = self._parse_current_int()
+                self._display_int(val)
+            except Exception:
+                pass
+            return
+
+        if op == "NOT":
+            val = self._parse_current_int()
+            res = bit_not(val, bits=32)
+            self.current = str(res)
+            self._display_int(res)
+            return
+
+        # binary ops consume operand and current
+        if self.operator and self.current:
+            a = int(self.operand)
+            b = self._parse_current_int()
+        else:
+            # if no pending operator, use current as a and wait for next
+            self.operand = self._parse_current_int()
+            self.operator = op
+            self.current = ""
+            self.display.delete(0, tk.END)
+            return
+
+        try:
+            if op == "AND":
+                res = bit_and(a, b)
+            elif op == "OR":
+                res = bit_or(a, b)
+            elif op == "XOR":
+                res = bit_xor(a, b)
+            elif op == "LSH":
+                res = lshift(a, b)
+            elif op == "RSH":
+                res = rshift(a, b)
+            else:
+                res = b
+        except Exception:
+            res = "Error"
+
+        self.current = str(res)
+        self._display_int(res)
+        self.operator = None
+        self.operand = None
 
     def display_value(self, value):
         self.display.delete(0, tk.END)
