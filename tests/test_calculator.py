@@ -22,3 +22,13 @@ def test_divide():
 def test_divide_zero():
     with pytest.raises(ZeroDivisionError):
         divide(1, 0)
+
+
+def test_negate():
+    assert negate(5) == -5
+    assert negate(-3) == 3
+
+
+def test_percent():
+    assert percent(50) == 0.5
+    assert percent(1) == 0.01

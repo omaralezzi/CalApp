@@ -24,3 +24,13 @@ def divide(a, b):
     if b == 0:
         raise ZeroDivisionError("Cannot divide by zero")
     return a / b
+
+
+def negate(a):
+    """Return the value of a with its sign flipped."""
+    return -a
+
+
+def percent(a):
+    """Convert a to a percentage (divide by 100)."""
+    return a / 100
